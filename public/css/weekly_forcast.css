@@ -13,8 +13,14 @@
   margin-left: 25%;
 }
 
+.forcast_box:hover{
+  opacity: 1;
+  transform:scale(1.1);
+}
 .forcast_box{
+  transition: all .2s;
   width:100%;
+  transform:scale(1);
   padding:2.5%;
   box-shadow:0px 0px 10px rgba(0,0,0,.5);
   background:black;

@@ -233,6 +233,7 @@ function PopulateDayFromWeek(day){
   ClearData();
   PopulateWeather(day_string,place,chosen_style,day_data);
   RenderForcast(forcast_data);
+
 }
 
 
@@ -253,7 +254,7 @@ function ClearData(){
   var week_row_el = document.querySelector(".week_row");
   var day_text = document.querySelector(".day_text");
   var video = document.querySelector("#forcast_video");
-
+  video.classList.add("inactive");
 
   video.innerHTML = "";
   day_text.innerHTML = "";
@@ -302,7 +303,7 @@ function PopulateWeather(day,location,style,config){
   var day_el = document.querySelector(".day_text");
   var video = document.querySelector("#forcast_video");
   var source = `<source  id = "forcast_source" src = "${style.img}" type="video/mp4">`
-
+console.log(source);
   day_el.append(day_node);
   location_el.append(location_node);
   overview_el.append(overview_node);
