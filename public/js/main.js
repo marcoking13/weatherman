@@ -19,46 +19,6 @@ var exit_weather;
 var forcast_data;
 var week = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"];
 
-function RenderForcast(forcast){
-
-  var html = ``;
-  var row = document.querySelector(".week_row");
-
-  for(var i = 0; i < forcast.length; i ++){
-
-    var style = DetermineWeather(forcast[i]).chosen_style;
-
-    if(style){
-      html+= (`<div class="col-1">
-          <div class="forcast_box" day = ${week[i]} day_counter = ${i}>
-              <img class = "forcast_icon" src ='${style.logo}'/>
-              <p class="day_forcast"> ${week[i]} </p>
-              <p class="temp_forcast"> ${CelsiusConverter(forcast[i].temperatureAvg) +  String.fromCharCode(176)} </p>
-          </div>
-      </div>`);
-    }
-
-
-}
-
-  row.innerHTML = html;
-
-  return html;
-
-}
-
-function AddForcastEvents(){
-  var forcast_days = document.getElementsByClassName("forcast_box");
-  for(var i = 0; i < forcast_days.length; i++){
-    forcast_days[i].addEventListener("click",(e)=>{
-      console.log(e.target);
-        var target = e.target;
-        var day_counter = target.getAttribute("day_counter");
-        PopulateDayFromWeek(day_counter);
-    })
-  }
-}
-
 
 const WEATHER_FIXED_CONFIG = {
 
@@ -107,12 +67,72 @@ const WEATHER_FIXED_CONFIG = {
 
 var weather_config;
 
-function DetermineWeather(weather_data){
+function RenderForcast(forcast,target){
 
+  var html = ``;
+  var row = document.querySelector(".week_row");
+
+  for(var i = 0; i < forcast.length; i ++){
+
+    var style = DetermineWeather(forcast[i]).chosen_style;
+    var active = "";
+
+    if(parseInt(target) == i){
+      active = "forcast_active"
+    }
+    
+    console.log(active)
+
+    if(style){
+      html+= (`<div class="col-1" >
+          <div class="forcast_box" id=${active} day = ${week[i]} day_counter = ${i}>
+              <img class = "forcast_icon" src ='${style.logo}'/>
+              <p class="day_forcast" > ${week[i]} </p>
+              <p class="temp_forcast" > ${CelsiusConverter(forcast[i].temperatureAvg) +  String.fromCharCode(176)} </p>
+          </div>
+      </div>`);
+    }
+
+
+}
+
+  row.innerHTML = html;
+
+  return html;
+
+}
+
+function AddForcastEvents(){
+
+  var forcast_days = document.getElementsByClassName("forcast_box");
+
+  for(var i = 0; i < forcast_days.length; i++){
+
+    forcast_days[i].classList.remove("forcast_active");
+
+    forcast_days[i].addEventListener("click",(e)=>{
+
+        var target = e.currentTarget;
+        var day_counter = target.getAttribute("day_counter");
+        var forcast = forcast_data[day_counter];
+        console.log(forcast,day_counter);
+        PopulateDayFromWeek(day_counter,forcast);
+
+    })
+  }
+}
+
+
+
+function DetermineWeather(weather_data){
   var chosen_data;
   var chosen_style = WEATHER_FIXED_CONFIG.sleet;
   var has_decided_weather = false;
-
+  console.log(weather_data);
+  // if(!weather_data){
+  //   chosen_style = WEATHER_FIXED_CONFIG.clear;
+  //   has_decided_weather = true;
+  // }
   if(weather_data.sleetIntensityAvg > SLEET_INTENSITY_STANDARD && !has_decided_weather){
 
     if(weather_data.precipitationProbabilityAvg > PRECIPITATION_STANDARD){
@@ -192,8 +212,8 @@ submit.addEventListener("submit",(e)=>{
     var chosen_style = DetermineWeather(weather_data).chosen_style;
     forcast_data = forcast_weekly;
     ClearData();
-    PopulateWeather(res.data.day,input.value,chosen_style,weather_data);
-    RenderForcast(forcast_weekly)
+    PopulateWeather(res.data.day - 1,input.value,chosen_style,weather_data);
+    RenderForcast(forcast_weekly,null)
     AddForcastEvents();
 
     weather_overview_container.classList.remove("inactive")
@@ -224,15 +244,26 @@ function CelsiusConverter(temp){
 }
 
 
-function PopulateDayFromWeek(day){
+function PopulateDayFromWeek(day,target){
 
-  var day_string = week[day];
-  var day_data = forcast_data[day];
+  var day_counter = parseInt(day);
+  var day_string = week[day_counter];
+  var day_data = forcast_data[day_counter];
   var place = input.value;
+  console.log(day_counter,place,day);
+
   var chosen_style = DetermineWeather(day_data).chosen_style;
+
   ClearData();
-  PopulateWeather(day_string,place,chosen_style,day_data);
-  RenderForcast(forcast_data);
+
+
+  if(day_counter < week.length || day > 0){
+    day_counter = parseInt(day);
+  }
+
+  PopulateWeather(day_counter,place,chosen_style,day_data);
+  RenderForcast(forcast_data,day_counter);
+  AddForcastEvents();
 
 }
 
@@ -254,6 +285,7 @@ function ClearData(){
   var week_row_el = document.querySelector(".week_row");
   var day_text = document.querySelector(".day_text");
   var video = document.querySelector("#forcast_video");
+
   video.classList.add("inactive");
 
   video.innerHTML = "";
@@ -288,7 +320,7 @@ function PopulateWeather(day,location,style,config){
   var sleet_node = document.createTextNode(config.sleetIntensityAvg);
   var snow_node = document.createTextNode(config.snowIntensityAvg);
   var cloud_node = document.createTextNode(config.cloudCoverAvg+ "%");
-  var day_node = document.createTextNode(week[day - 1]);
+  var day_node = document.createTextNode(week[day]);
   var location_el = document.querySelector(".weather_overview_title");
   var overview_el = document.querySelector(".weather_overview_weather");
   var tempAv_el = document.querySelector("[info=temperature-average]");
@@ -303,7 +335,7 @@ function PopulateWeather(day,location,style,config){
   var day_el = document.querySelector(".day_text");
   var video = document.querySelector("#forcast_video");
   var source = `<source  id = "forcast_source" src = "${style.img}" type="video/mp4">`
-console.log(source);
+
   day_el.append(day_node);
   location_el.append(location_node);
   overview_el.append(overview_node);
@@ -319,6 +351,7 @@ console.log(source);
 
   var background = `linear-gradient(rgba(0,0,0,.2),rgba(0,0,0,.2)),url("${style.img}");`
   var weather_overview_container = document.querySelector(".weather_main_overview_container");
+
   video.classList.remove("inactive");
   video.innerHTML = source;
 
