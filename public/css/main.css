@@ -1,17 +1,61 @@
 .row{
   width:100%;
 }
+
 .width-100{
   width:100%;
 }
-.login_button{
-  background:white;
-  color:black !important;
+
+.button_weather{
+  border:2px solid #202020;
+  border-radius:0px;
+  margin-top:2.5%;
 }
+
+.login_button{
+  background:none;
+  color:#FCF5E5;
+}
+
+.button_weather:hover{
+  border-color:  #FCF5E5;
+  transition:  all .3s;
+  color:  #FCF5E5;
+}
+
+.exit_child{
+  position: absolute;
+  opacity: 1;
+  z-index:5;
+  color:white;
+}
+
+.exit_child:hover{
+  animation:exit infinite 1s ease-in;
+}
+
+@keyframes exit{
+  0%{
+    opacity:0;
+    transform:scale(1);
+
+  }
+  20%{
+    transform:scale(1.5);
+    opacity:1;
+  }
+
+  100%{
+    opacity:0;
+    transform:scale(1);
+
+  }
+}
+
 #forcast_video{
   min-width:100%;
   z-index: 0;
-  height:100%;
+  height:120%;
   box-sizing: content-box;
   position: absolute;
 }
@@ -50,33 +94,34 @@ body{
 }
 
 .logo_name{
-  font-size: 20px;
+  font-size: 25px;
+  margin-top:5%;
   font-weight:300;
-  color:#38B6FF;
+  color:#FCF5E5;
 
-  font-family: "Amazon Ember";
+  font-family: "IBM Plex Sans";
   float:left;
   margin-top:2.5%;
   margin-left:5%;
 }
 .navbar_row{
   padding:1%;
-  background:black;
+  background:#171717;
 }
 .logo{
-  width:50px;
-  height:50px;
+  width:70px;
+  height:70px;
   float:left;
   margin-left:2.5%;
 }
 .button_weather{
   float: right;
-  color:white;
+  color:#FCF5E5;
   margin-right:5%;
 }
 
 .account_button{
-  background:#38B6FF;
+  background:none;
 }
 
 .weather_input{

@@ -8,6 +8,7 @@ var Locations = require("./../data/locations.js");
 
 var weather_data = {
   precipitationProbabilityAvg:0,
+
   windGustAvg:0,
   snowIntensityAvg:0,
   sleetIntensityAvg:0,
@@ -29,6 +30,51 @@ const GetMainPage = (req,res,next) =>{
 }
 
 
+const ConvertLocation =  async (place) =>
+{
+
+  const coords = await geocoder.geocode(place);
+
+  if(coords.length <=0){
+    return false;
+  }
+
+  if(coords.length > 0){
+
+    latitude = coords[0].latitude;
+    longitude = coords[0].longitude;
+
+    return {
+      latitude:latitude,
+      longitude:longitude
+    }
+
+  }else{
+    return false;
+  }
+
+}
+
+
+const PostTimeline = async (req,res,next) => {
+
+  var place = req.body.place;
+  var latitude;
+  var longitude;
+
+  if(req.params == {} || !req.params){
+    console.log("Not found");
+    return res.send(false);
+  }
+
+  var location = await ConvertLocation(place);
+
+  return location;
+
+}
+
+
+
 const PostWeatherData = async (req,res,next) => {
 
   var place = req.body.place;
@@ -37,16 +83,17 @@ const PostWeatherData = async (req,res,next) => {
 
   if(req.params == {} || !req.params){
     console.log("Not found");
-    return;
+    return res.send(false);
   }
 
-  const coords = await geocoder.geocode(place);
+    var location = await ConvertLocation(place);
+    console.log(location);
+    var custom_endpoint = custom_url(location.latitude,location.longitude);
 
-  if(coords.length > 0){
-
-    latitude = coords[0].latitude;
-    longitude = coords[0].longitude;
-    var custom_endpoint = custom_url(latitude,longitude);
+    if(!location){
+      res.json(false);
+      return;
+    }
 
     axios.get(custom_endpoint).then((response)=>{
 
@@ -85,8 +132,8 @@ const PostWeatherData = async (req,res,next) => {
         userID:"guest",
         location:{
           name:place,
-          lat:latitude,
-          lng:longitude
+          lat:location.latitude,
+          lng:location.longitude
         },
         date: now,
         day:now.getDay()
@@ -99,14 +146,13 @@ const PostWeatherData = async (req,res,next) => {
 
 
     }).then((data)=>{
-      console.log(data.day);
       res.json(data);
     }).catch((err)=>{console.log(err)})
 
   }
 
 
-}
+
 
 module.exports.GetMainPage = GetMainPage;
 module.exports.PostWeatherData = PostWeatherData;
